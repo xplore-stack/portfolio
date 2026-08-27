@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTheme } from "./theme-context";
 
 function useFadeUp() {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,10 +40,27 @@ const navLinks = [
   { href: "#contact", label: "Contact" },
 ];
 
+function SunIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const containerRef = useFadeUp();
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -55,47 +73,79 @@ export default function Home() {
       {/* Navbar */}
       <nav
         className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-zinc-950/80 nav-blur border-b border-zinc-800/50" : "bg-transparent"
+          scrolled ? "nav-blur border-b" : "bg-transparent"
         }`}
+        style={scrolled ? { backgroundColor: "var(--nav-bg)", borderColor: "var(--nav-border)" } : {}}
       >
         <div className="max-w-4xl mx-auto flex items-center justify-between py-4 px-4 sm:px-6">
-          <a href="#" className="text-lg font-bold gradient-text">SR</a>
+          <a href="#" className="text-lg font-bold gradient-text">Sahil Reza</a>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex gap-6 text-sm text-zinc-400">
+          <div className="hidden md:flex items-center gap-6 text-sm" style={{ color: "var(--muted)" }}>
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="animated-underline hover:text-white transition-colors">
+              <a key={link.href} href={link.href} className="animated-underline hover:text-[var(--foreground)] transition-colors">
                 {link.label}
               </a>
             ))}
+            <button
+              onClick={toggle}
+              className="theme-toggle p-2 rounded-full hover:bg-[var(--tag-bg)] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </button>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden flex flex-col gap-1.5 p-2 -mr-2 relative z-50"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className={`block w-5 h-0.5 bg-zinc-300 transition-all duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-zinc-300 transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-zinc-300 transition-all duration-300 ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
-          </button>
+          {/* Mobile right side */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={toggle}
+              className="theme-toggle p-2 rounded-full hover:bg-[var(--tag-bg)] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </button>
+            <button
+              className="flex flex-col gap-1.5 p-2 -mr-2 relative z-50"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span
+                className="block w-5 h-0.5 transition-all duration-300"
+                style={{ backgroundColor: "var(--foreground)", transform: mobileMenuOpen ? "rotate(45deg) translateY(8px)" : "" }}
+              />
+              <span
+                className="block w-5 h-0.5 transition-all duration-300"
+                style={{ backgroundColor: "var(--foreground)", opacity: mobileMenuOpen ? 0 : 1 }}
+              />
+              <span
+                className="block w-5 h-0.5 transition-all duration-300"
+                style={{ backgroundColor: "var(--foreground)", transform: mobileMenuOpen ? "rotate(-45deg) translateY(-8px)" : "" }}
+              />
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden fixed inset-0 z-40 bg-zinc-950/98 nav-blur transition-all duration-500 ${
-          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className="md:hidden fixed inset-0 z-40 nav-blur transition-all duration-500"
+        style={{
+          backgroundColor: "var(--mobile-menu-bg)",
+          opacity: mobileMenuOpen ? 1 : 0,
+          pointerEvents: mobileMenuOpen ? "auto" : "none",
+        }}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
           {navLinks.map((link, i) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-2xl text-zinc-300 hover:text-white transition-all duration-300"
-              style={{ transitionDelay: mobileMenuOpen ? `${i * 60}ms` : "0ms" }}
+              className="text-2xl transition-all duration-300"
+              style={{
+                color: "var(--foreground)",
+                transitionDelay: mobileMenuOpen ? `${i * 60}ms` : "0ms",
+              }}
               onClick={() => setMobileMenuOpen(false)}
             >
               {link.label}
@@ -110,27 +160,35 @@ export default function Home() {
           <div className="relative z-10 flex flex-col gap-5">
             <div className="fade-up flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
-              <p className="text-zinc-500 text-sm tracking-wide uppercase">Hello, I&apos;m</p>
+              <p className="text-sm tracking-wide uppercase" style={{ color: "var(--muted)" }}>Hello, I&apos;m</p>
             </div>
             <h1 className="fade-up text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight gradient-text">
               Sahil Reza
             </h1>
-            <p className="fade-up text-lg sm:text-2xl text-zinc-400 font-light">
+            <p className="fade-up text-lg sm:text-2xl font-light" style={{ color: "var(--muted-light)" }}>
               B.Tech VLSI Engineering Student
             </p>
-            <p className="fade-up text-zinc-500 max-w-lg text-sm sm:text-base leading-relaxed">
+            <p className="fade-up max-w-lg text-sm sm:text-base leading-relaxed" style={{ color: "var(--muted)" }}>
               Electronic Engineering (VLSI Design & Technology) student at Galgotias College of
               Engineering and Technology, passionate about semiconductor design, digital systems,
               and building efficient hardware solutions.
             </p>
             <div className="fade-up flex flex-wrap gap-4 mt-2">
-              <a href="#contact" className="group px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200 transition-all duration-300 text-sm sm:text-base flex items-center gap-2">
+              <a
+                href="#contact"
+                className="group px-6 py-3 rounded-full font-medium transition-all duration-300 text-sm sm:text-base flex items-center gap-2"
+                style={{ backgroundColor: "var(--foreground)", color: "var(--background)" }}
+              >
                 Get in Touch
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
-              <a href="#projects" className="px-6 py-3 border border-zinc-700 rounded-full font-medium hover:border-zinc-500 hover:bg-zinc-900/50 transition-all duration-300 text-sm sm:text-base">
+              <a
+                href="#projects"
+                className="px-6 py-3 border rounded-full font-medium transition-all duration-300 text-sm sm:text-base hover:opacity-80"
+                style={{ borderColor: "var(--card-border)", color: "var(--foreground)" }}
+              >
                 View Work
               </a>
             </div>
@@ -141,10 +199,10 @@ export default function Home() {
         <section id="about" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">01</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>01</span>
             About
           </h2>
-          <div className="text-zinc-400 leading-relaxed max-w-2xl space-y-5 text-sm sm:text-base">
+          <div className="leading-relaxed max-w-2xl space-y-5 text-sm sm:text-base" style={{ color: "var(--muted)" }}>
             <p className="fade-up">
               I am a passionate B.Tech student specializing in VLSI Design & Technology at
               Galgotias College of Engineering and Technology, Greater Noida, Uttar Pradesh, India.
@@ -169,7 +227,7 @@ export default function Home() {
         <section id="education" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">02</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>02</span>
             Education
           </h2>
           <div className="flex flex-col gap-6 stagger-children">
@@ -193,13 +251,17 @@ export default function Home() {
                 year: "2019 - 2020",
               },
             ].map((edu) => (
-              <div key={edu.degree} className="fade-up group flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 p-4 sm:p-5 rounded-xl border border-transparent hover:border-zinc-800 hover:bg-zinc-900/30 transition-all duration-300">
+              <div
+                key={edu.degree}
+                className="fade-up group flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 p-4 sm:p-5 rounded-xl border border-transparent hover:border-[var(--card-border)] transition-all duration-300"
+                style={{ ["--tw-border-opacity" as string]: 1 }}
+              >
                 <div>
-                  <h3 className="font-semibold text-sm sm:text-base group-hover:text-white transition-colors">{edu.degree}</h3>
-                  <p className="text-zinc-400 text-sm">{edu.school}</p>
-                  <p className="text-zinc-500 text-sm">{edu.location}</p>
+                  <h3 className="font-semibold text-sm sm:text-base">{edu.degree}</h3>
+                  <p className="text-sm" style={{ color: "var(--muted)" }}>{edu.school}</p>
+                  <p className="text-sm" style={{ color: "var(--muted-light)" }}>{edu.location}</p>
                 </div>
-                <span className="text-zinc-500 text-sm shrink-0">{edu.year}</span>
+                <span className="text-sm shrink-0" style={{ color: "var(--muted-light)" }}>{edu.year}</span>
               </div>
             ))}
           </div>
@@ -209,7 +271,7 @@ export default function Home() {
         <section id="skills" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">03</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>03</span>
             Skills
           </h2>
           <div className="space-y-8 stagger-children">
@@ -232,10 +294,20 @@ export default function Home() {
               },
             ].map((group) => (
               <div key={group.category} className="fade-up">
-                <h3 className="text-sm font-medium text-zinc-500 mb-3">{group.category}</h3>
+                <h3 className="text-sm font-medium mb-3" style={{ color: "var(--muted-light)" }}>{group.category}</h3>
                 <div className="flex flex-wrap gap-2">
                   {group.skills.map((skill) => (
-                    <span key={skill} className="skill-tag px-3 py-1.5 bg-zinc-900 rounded-lg text-xs sm:text-sm text-zinc-300 border border-zinc-800 cursor-default">
+                    <span
+                      key={skill}
+                      className="skill-tag px-3 py-1.5 rounded-lg text-xs sm:text-sm cursor-default"
+                      style={{
+                        backgroundColor: "var(--tag-bg)",
+                        borderColor: "var(--tag-border)",
+                        color: "var(--foreground)",
+                        borderWidth: 1,
+                        borderStyle: "solid",
+                      }}
+                    >
                       {skill}
                     </span>
                   ))}
@@ -249,19 +321,22 @@ export default function Home() {
         <section id="experience" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">04</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>04</span>
             Experience
           </h2>
           <div className="flex flex-col gap-6 stagger-children">
-            <div className="fade-up card-hover p-5 sm:p-6 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
+            <div
+              className="fade-up card-hover p-5 sm:p-6 rounded-xl"
+              style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+            >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
                 <div>
                   <h3 className="font-semibold text-sm sm:text-base">VLSI Design Intern</h3>
-                  <p className="text-zinc-400 text-sm">Semiconductor Lab, GCET</p>
+                  <p className="text-sm" style={{ color: "var(--muted)" }}>Semiconductor Lab, GCET</p>
                 </div>
-                <span className="text-zinc-500 text-sm shrink-0">May 2025 - Jul 2025</span>
+                <span className="text-sm shrink-0" style={{ color: "var(--muted-light)" }}>May 2025 - Jul 2025</span>
               </div>
-              <ul className="mt-4 text-zinc-400 text-sm space-y-2 list-none">
+              <ul className="mt-4 text-sm space-y-2 list-none" style={{ color: "var(--muted)" }}>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 mt-1.5 text-xs">&#9679;</span>
                   <span>Designed and simulated a 8x1 multiplexer using CMOS technology in Cadence Virtuoso</span>
@@ -276,15 +351,18 @@ export default function Home() {
                 </li>
               </ul>
             </div>
-            <div className="fade-up card-hover p-5 sm:p-6 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
+            <div
+              className="fade-up card-hover p-5 sm:p-6 rounded-xl"
+              style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+            >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
                 <div>
                   <h3 className="font-semibold text-sm sm:text-base">Technical Intern</h3>
-                  <p className="text-zinc-400 text-sm">Startup Project - IoT Based Smart Agriculture</p>
+                  <p className="text-sm" style={{ color: "var(--muted)" }}>Startup Project - IoT Based Smart Agriculture</p>
                 </div>
-                <span className="text-zinc-500 text-sm shrink-0">Jan 2025 - Mar 2025</span>
+                <span className="text-sm shrink-0" style={{ color: "var(--muted-light)" }}>Jan 2025 - Mar 2025</span>
               </div>
-              <ul className="mt-4 text-zinc-400 text-sm space-y-2 list-none">
+              <ul className="mt-4 text-sm space-y-2 list-none" style={{ color: "var(--muted)" }}>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 mt-1.5 text-xs">&#9679;</span>
                   <span>Developed embedded system firmware using C for ESP32 microcontroller</span>
@@ -306,7 +384,7 @@ export default function Home() {
         <section id="projects" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">05</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>05</span>
             Projects
           </h2>
           <div className="flex flex-col gap-4 stagger-children">
@@ -348,17 +426,27 @@ export default function Home() {
                 tags: ["Verilog", "FPGA", "Digital Design"],
               },
             ].map((project) => (
-              <div key={project.title} className="fade-up card-hover p-5 sm:p-6 bg-zinc-900/50 border border-zinc-800/50 rounded-xl group">
+              <div
+                key={project.title}
+                className="fade-up card-hover p-5 sm:p-6 rounded-xl group"
+                style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+              >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
-                  <h3 className="text-base sm:text-lg font-semibold group-hover:text-white transition-colors">{project.title}</h3>
-                  <span className="text-zinc-500 text-sm shrink-0">{project.year}</span>
+                  <h3 className="text-base sm:text-lg font-semibold">{project.title}</h3>
+                  <span className="text-sm shrink-0" style={{ color: "var(--muted-light)" }}>{project.year}</span>
                 </div>
-                <p className="text-zinc-400 text-sm mt-3 leading-relaxed">
+                <p className="text-sm mt-3 leading-relaxed" style={{ color: "var(--muted)" }}>
                   {project.desc}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-4">
                   {project.tags.map((tag) => (
-                    <span key={tag} className="text-xs px-2.5 py-1 bg-zinc-800/80 rounded-md text-zinc-300">{tag}</span>
+                    <span
+                      key={tag}
+                      className="text-xs px-2.5 py-1 rounded-md"
+                      style={{ backgroundColor: "var(--tag-bg)", color: "var(--muted)" }}
+                    >
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -370,7 +458,7 @@ export default function Home() {
         <section id="certifications" className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">06</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>06</span>
             Certifications
           </h2>
           <div className="flex flex-col gap-3 stagger-children">
@@ -381,12 +469,19 @@ export default function Home() {
               { name: "Introduction to Embedded Systems", issuer: "NPTEL / IIT", year: "2023" },
               { name: "Python for Data Science", issuer: "IBM / Coursera", year: "2022" },
             ].map((cert) => (
-              <div key={cert.name} className="fade-up group flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-xl gap-2 sm:gap-4 hover:border-zinc-700 hover:bg-zinc-900/60 transition-all duration-300">
+              <div
+                key={cert.name}
+                className="fade-up group flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 rounded-xl gap-2 sm:gap-4 transition-all duration-300"
+                style={{
+                  backgroundColor: "var(--card-bg)",
+                  border: "1px solid var(--card-border)",
+                }}
+              >
                 <div>
-                  <h3 className="font-medium text-sm sm:text-base group-hover:text-white transition-colors">{cert.name}</h3>
-                  <p className="text-zinc-500 text-sm">{cert.issuer}</p>
+                  <h3 className="font-medium text-sm sm:text-base">{cert.name}</h3>
+                  <p className="text-sm" style={{ color: "var(--muted-light)" }}>{cert.issuer}</p>
                 </div>
-                <span className="text-zinc-500 text-sm shrink-0">{cert.year}</span>
+                <span className="text-sm shrink-0" style={{ color: "var(--muted-light)" }}>{cert.year}</span>
               </div>
             ))}
           </div>
@@ -396,10 +491,10 @@ export default function Home() {
         <section className="py-16 sm:py-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-8">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">07</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>07</span>
             Achievements
           </h2>
-          <ul className="text-zinc-400 space-y-4 text-sm sm:text-base stagger-children">
+          <ul className="space-y-4 text-sm sm:text-base stagger-children" style={{ color: "var(--muted)" }}>
             {[
               "Participated in National Level VLSI Design Competition at IIT Roorkee (2024)",
               'Won 2nd Prize in College Technical Paper Presentation on "Low Power VLSI Design"',
@@ -409,7 +504,7 @@ export default function Home() {
             ].map((item) => (
               <li key={item} className="fade-up flex items-start gap-3 group">
                 <span className="text-emerald-400 mt-1 text-xs pulse-dot">&#9679;</span>
-                <span className="group-hover:text-zinc-200 transition-colors">{item}</span>
+                <span className="group-hover:text-[var(--foreground)] transition-colors">{item}</span>
               </li>
             ))}
           </ul>
@@ -419,44 +514,44 @@ export default function Home() {
         <section id="contact" className="py-16 sm:py-24 mb-16 sm:mb-24">
           <div className="section-divider mb-16 sm:mb-24" />
           <h2 className="fade-up text-xl sm:text-2xl font-bold mb-4">
-            <span className="text-zinc-500 text-sm font-normal block mb-2">08</span>
+            <span className="text-sm font-normal block mb-2" style={{ color: "var(--muted)" }}>08</span>
             Contact
           </h2>
-          <p className="fade-up text-zinc-400 mb-8 text-sm sm:text-base">Feel free to reach out for collaborations, internships, or just a chat.</p>
+          <p className="fade-up mb-8 text-sm sm:text-base" style={{ color: "var(--muted)" }}>Feel free to reach out for collaborations, internships, or just a chat.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 stagger-children">
             <div className="fade-up space-y-5">
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Email</p>
-                <a href="mailto:sahil.reza@example.com" className="text-zinc-300 hover:text-white transition-colors text-sm sm:text-base break-all animated-underline">sahil.reza@example.com</a>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>Email</p>
+                <a href="mailto:sahil.reza@example.com" className="hover:text-[var(--foreground)] transition-colors text-sm sm:text-base break-all animated-underline" style={{ color: "var(--muted)" }}>sahil.reza@example.com</a>
               </div>
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Phone</p>
-                <a href="tel:+919876543210" className="text-zinc-300 hover:text-white transition-colors text-sm sm:text-base animated-underline">+91 98765 43210</a>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>Phone</p>
+                <a href="tel:+919876543210" className="hover:text-[var(--foreground)] transition-colors text-sm sm:text-base animated-underline" style={{ color: "var(--muted)" }}>+91 98765 43210</a>
               </div>
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Location</p>
-                <p className="text-zinc-300 text-sm sm:text-base">Greater Noida, Uttar Pradesh, India</p>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>Location</p>
+                <p className="text-sm sm:text-base" style={{ color: "var(--muted)" }}>Greater Noida, Uttar Pradesh, India</p>
               </div>
             </div>
             <div className="fade-up space-y-5">
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">LinkedIn</p>
-                <a href="https://linkedin.com/in/sahil-reza" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white transition-colors text-sm sm:text-base break-all animated-underline">linkedin.com/in/sahil-reza</a>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>LinkedIn</p>
+                <a href="https://linkedin.com/in/sahil-reza" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors text-sm sm:text-base break-all animated-underline" style={{ color: "var(--muted)" }}>linkedin.com/in/sahil-reza</a>
               </div>
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">GitHub</p>
-                <a href="https://github.com/sahil-reza" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white transition-colors text-sm sm:text-base break-all animated-underline">github.com/sahil-reza</a>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>GitHub</p>
+                <a href="https://github.com/sahil-reza" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors text-sm sm:text-base break-all animated-underline" style={{ color: "var(--muted)" }}>github.com/sahil-reza</a>
               </div>
               <div>
-                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">LeetCode</p>
-                <a href="https://leetcode.com/sahil-reza" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white transition-colors text-sm sm:text-base break-all animated-underline">leetcode.com/sahil-reza</a>
+                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "var(--muted-light)" }}>LeetCode</p>
+                <a href="https://leetcode.com/sahil-reza" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors text-sm sm:text-base break-all animated-underline" style={{ color: "var(--muted)" }}>leetcode.com/sahil-reza</a>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="w-full max-w-4xl px-4 sm:px-6 py-8 border-t border-zinc-800/50 text-center text-zinc-600 text-sm">
+      <footer className="w-full max-w-4xl px-4 sm:px-6 py-8 border-t text-center text-sm" style={{ borderColor: "var(--divider)", color: "var(--muted-light)" }}>
         &copy; {new Date().getFullYear()} Sahil Reza. All rights reserved.
       </footer>
     </div>
